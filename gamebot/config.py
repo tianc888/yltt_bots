@@ -1,5 +1,5 @@
-TELEGRAM_TOKEN = "你的BotToken"
-GROUP_ID = -100xxxxxxxx    # 游戏群组ID
-ADMINS = [123456789]       # 管理员用户ID或username
+TELEGRAM_TOKEN = "7303119673:AAGAgKHWs760UdtDlVPHIhypYYkiBi_791w"
+GROUP_ID = -1002874860074    # 游戏群组ID
+ADMINS = [8166234652]       # 管理员用户ID或username
 BOT_USERNAME = "你的botusername"
 DATABASE = "wallet.db"     # 与walletbot共用同一db文件
