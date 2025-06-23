@@ -1,4 +1,5 @@
 import logging
+import os
 import asyncio
 from telegram.ext import Application, CommandHandler, MessageHandler, filters
 from config import TELEGRAM_TOKEN, BOT_NAME
@@ -22,7 +23,6 @@ async def start(update, context):
     )
 
 async def recharge(update, context):
-    import os
     qr_path = os.path.join(os.path.dirname(__file__), "../static/recharge_qr.png")
     if os.path.exists(qr_path):
         with open(qr_path, "rb") as f:
