@@ -1,84 +1,47 @@
 import logging
-from telegram import Update, KeyboardButton, ReplyKeyboardMarkup, BotCommand
-from telegram.ext import (
-    Application, CommandHandler, CallbackQueryHandler, MessageHandler, filters
-)
-from gamebot.config import TELEGRAM_TOKEN, BOT_NAME
-from db import init_db, get_user
-from gamebot.handlers.recharge import recharge
-from gamebot.handlers.withdraw import withdraw
-from gamebot.handlers.transfer import transfer
-from gamebot.handlers.collect import collect
+import asyncio
+from telegram.ext import Application, CommandHandler, MessageHandler, filters
+from config import TELEGRAM_TOKEN, BOT_NAME
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-
-main_menu = [
-    [KeyboardButton("💵充值")],
-    [KeyboardButton("💸提币")],
-    [KeyboardButton("⏫转账")],
-    [KeyboardButton("⏬收款")]
+START_MENU = [
+    ["充值", "提现"],
+    ["返回上一步"]
 ]
 
-async def start(update: Update, context):
-    user = update.effective_user
-    db_user = get_user(user.id, user.username or user.full_name)
-    usdt = db_user[2] if db_user else 0
-    cny = db_user[3] if db_user else 0
-    text = (
-        f"欢迎使用【{BOT_NAME}】\n\n"
-        f"昵称: {user.full_name or user.username}\n"
-        f"ID: {user.id}\n"
-        f"USDT: {usdt:.3f}\n"
-        f"CNY: {cny:.2f}\n"
-        f"---------------------------"
-    )
+logging.basicConfig(
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO
+)
+logger = logging.getLogger(__name__)
+
+async def start(update, context):
+    from telegram import ReplyKeyboardMarkup
+    reply_markup = ReplyKeyboardMarkup(START_MENU, resize_keyboard=True)
     await update.message.reply_text(
-        text,
-        reply_markup=ReplyKeyboardMarkup(main_menu, resize_keyboard=True)
+        f"欢迎使用{BOT_NAME}！请选择操作：", reply_markup=reply_markup
     )
 
-async def support(update: Update, context):
-    await update.message.reply_text("客服请联系 @YourSupportAccount")
+async def recharge(update, context):
+    await update.message.reply_text("请点击钱包机器人进行充值：@你的钱包机器人用户名")
 
-async def menu_router(update: Update, context):
-    text = update.message.text
-    if "充值" in text:
-        await recharge(update, context)
-    elif "提币" in text:
-        await withdraw(update, context)
-    elif "转账" in text:
-        await transfer(update, context)
-    elif "收款" in text:
-        await collect(update, context)
+async def withdraw(update, context):
+    await update.message.reply_text("请输入提现金额：")
 
-async def button_callback(update: Update, context):
-    query = update.callback_query
-    data = query.data
-    await query.answer()
-    if data == 'main_menu':
-        await start(update, context)
-    elif data == 'copy_address':
-        from gamebot.config import RECHARGE_ADDRESS
-        await query.edit_message_caption(caption=f"已复制钱包地址：\n`{RECHARGE_ADDRESS}`", parse_mode="Markdown")
-    elif data.startswith('withdraw'):
-        await query.edit_message_text("请输入提现地址和金额（开发中）")
-    elif data == 'select_recipient':
-        await query.edit_message_text("请输入收款人信息（开发中）")
+async def unknown(update, context):
+    await update.message.reply_text("无法识别的指令，请重新选择。")
 
-def main():
-    init_db()
+async def main():
     app = Application.builder().token(TELEGRAM_TOKEN).build()
-    app.add_handler(CommandHandler("start", start))
-    app.add_handler(CommandHandler("support", support))
-    app.add_handler(MessageHandler(filters.TEXT, menu_router))
-    app.add_handler(CallbackQueryHandler(button_callback))
-    # 设置菜单命令
-    app.bot.set_my_commands([
-        BotCommand("start", "启动机器人"),
-        BotCommand("support", "客服支持")
+    await app.bot.set_my_commands([
+        ("start", "开始使用"),
+        ("充值", "充值到游戏"),
+        ("提现", "从游戏提现")
     ])
-    app.run_polling()
+    app.add_handler(CommandHandler("start", start))
+    app.add_handler(MessageHandler(filters.Regex("^充值$"), recharge))
+    app.add_handler(MessageHandler(filters.Regex("^提现$"), withdraw))
+    app.add_handler(MessageHandler(filters.ALL, unknown))
+    logger.info("游戏机器人已启动...")
+    await app.run_polling()
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())
