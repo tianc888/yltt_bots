@@ -28,7 +28,6 @@ def init_db():
         note TEXT,
         time DATETIME DEFAULT CURRENT_TIMESTAMP
     )""")
-    # 更多表可按需添加
     conn.commit()
     conn.close()
 
