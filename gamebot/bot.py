@@ -1,9 +1,16 @@
 import asyncio
 from telegram.ext import ApplicationBuilder
 
+# 从 config.py 中导入你的 Token
+from config import GAMEBOT_TOKEN
+
 async def main():
-    app = ApplicationBuilder().token("YOUR_GAMEBOT_TOKEN").build()
-    # ... 你的业务逻辑和 handler 注册
+    app = ApplicationBuilder().token(GAMEBOT_TOKEN).build()
+
+    # 在这里注册你的各类命令和 handler
+    # 例如: app.add_handler(CommandHandler("start", start_callback))
+    # 你自己的其它初始化逻辑...
+
     print("游戏机器人已启动...")
     await app.run_polling()
 
