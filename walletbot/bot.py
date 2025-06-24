@@ -1,16 +1,16 @@
 import asyncio
 from telegram.ext import ApplicationBuilder
 
-# 这里可以引入你自己的模块和配置
+# 如果你有配置文件，比如 config.py，可以这样导入：
 # from config import TELEGRAM_TOKEN
 
 async def main():
-    # 用你的实际token替换下面的YOUR_WALLETBOT_TOKEN，或者用 config 里的 TELEGRAM_TOKEN
+    # 用你的实际钱包机器人 token 替换下面的 YOUR_WALLETBOT_TOKEN
     app = ApplicationBuilder().token("YOUR_WALLETBOT_TOKEN").build()
 
-    # 在这里注册你的各类命令和handler
+    # 在这里注册你的各类命令和 handler
     # 例如: app.add_handler(CommandHandler("start", start_callback))
-    # 你自己的其它初始化逻辑...
+    # 可以加入你自己的其它初始化逻辑...
 
     print("钱包机器人已启动...")
     await app.run_polling()
